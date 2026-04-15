@@ -633,6 +633,7 @@
             <div class="info-row"><div class="info-label">Район:</div><div class="info-value">${selectedTicket.district}</div></div>
             <div class="info-row"><div class="info-label">Статус:</div><div class="info-value"><span class="service-badge ${getServiceClass(selectedTicket.serviceCode)}">${selectedTicket.status}</span></div></div>
             <button class="csv-btn" onclick="exportCSV()">📎 Выгрузить в CSV</button>
+			<button>⚠ Сменить статус заявки</button>
             <button class="assign-btn ${!canAssign ? 'disabled' : ''}" ${!canAssign ? 'disabled' : 'onclick="openAssignModal()"'}>👷 Назначить инженера</button>
         `;
     }
