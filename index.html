@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>📶Телеком | Управление выездным персоналом</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #E8ECEF;
+            padding: 20px;
+        }
+
+        /* Desktop Container */
+        .desktop-container {
+            max-width: 1440px;
+            margin: 0 auto 40px;
+            background: #F5F7FA;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: #1A2A3A;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .logo span {
+            color: #00D5FF;
+        }
+
+        .user-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.1);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Filters */
+        .filters {
+            padding: 20px 32px;
+            background: white;
+            border-bottom: 1px solid #E1E5E9;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: #4A5568;
+        }
+
+        .date-range {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .date-input {
+            padding: 8px 12px;
+            border: 1px solid #CBD5E0;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+
+        .status-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .status-btn {
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: #EDF2F7;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .status-btn.active {
+            background: #1A2A3A;
+            color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            padding: 24px 32px;
+            gap: 32px;
+            min-height: 600px;
+        }
+
+        /* Заявки List */
+        .tickets-list {
+            flex: 1.2;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .list-header {
+            padding: 16px 20px;
+            background: #FAFBFC;
+            border-bottom: 1px solid #E1E5E9;
+            font-weight: 600;
+        }
+
+        .ticket-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #EDF2F7;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+        }
+
+        .ticket-item.selected {
+            background: #F0F7FF;
+            border-left-color: #1A2A3A;
+        }
+
+        .ticket-time {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .ticket-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .ticket-service {
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        .ticket-status {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        /* Цвета услуг — фон для бейджа статуса */
+        .status-internet { background: #00D5FF; color: #1A2A3A; }
+        .status-mobile { background: #00FF80; color: #1A2A3A; }
+        .status-tv { background: #FFF700; color: #1A2A3A; }
+        .status-cam { background: #C400FF; color: white; }
+        .status-closed { background: #D7D3D8; color: #4A5568; }
+
+        /* Цвета для левой границы */
+        .border-internet { border-left-color: #00D5FF; }
+        .border-mobile { border-left-color: #00FF80; }
+        .border-tv { border-left-color: #FFF700; }
+        .border-cam { border-left-color: #C400FF; }
+
+        /* Info Panel */
+        .info-panel {
+            flex: 0.8;
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .info-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #00D5FF;
+        }
+
+        .info-row {
+            margin-bottom: 12px;
+            display: flex;
+        }
+
+        .info-label {
+            font-weight: 500;
+            width: 110px;
+            color: #4A5568;
+        }
+
+        .info-value {
+            flex: 1;
+            color: #2D3748;
+        }
+
+        .csv-btn, .assign-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 16px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .csv-btn {
+            background: #EDF2F7;
+            color: #2D3748;
+        }
+
+        .assign-btn {
+            background: #00D5FF;
+            color: #1A2A3A;
+        }
+
+        .assign-btn.disabled {
+            background: #CBD5E0;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            width: 700px;
+            max-width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+            padding: 28px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .engineer-list {
+            margin: 20px 0;
+        }
+
+        .engineer-item {
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .engineer-item.selected {
+            background: #EDF2F7;
+            border: 1px solid #00D5FF;
+        }
+
+        .engineer-available { background: #20D9EE20; border-left: 4px solid #20D9EE; }
+        .engineer-district { background: #20EE4920; border-left: 4px solid #20EE49; }
+        .engineer-unavailable { background: #D7D3D840; border-left: 4px solid #D7D3D8; opacity: 0.6; }
+
+        .schedule-preview {
+            background: #F7FAFC;
+            padding: 16px;
+            border-radius: 12px;
+            margin: 16px 0;
+            font-size: 13px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .confirm-btn {
+            background: #00D5FF;
+        }
+
+        .cancel-btn {
+            background: #EDF2F7;
+        }
+
+        /* Mobile View */
+        .mobile-container {
+            max-width: 390px;
+            margin: 0 auto;
+            background: #F5F7FA;
+            border-radius: 40px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .mobile-status-bar {
+            background: #1A2A3A;
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .mobile-header {
+            background: #1A2A3A;
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-content {
+            padding: 20px;
+            height: 600px;
+            overflow-y: auto;
+        }
+
+        .day-section {
+            margin-bottom: 24px;
+        }
+
+        .day-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #1A2A3A;
+        }
+
+        .task-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid;
+        }
+
+        .task-card.blue { border-left-color: #00D5FF; }
+        .task-card.green { border-left-color: #00FF80; }
+        .task-card.yellow { border-left-color: #FFF700; }
+
+        .task-time {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .task-address {
+            font-size: 13px;
+            color: #718096;
+            margin-bottom: 4px;
+        }
+
+        .task-service {
+            font-size: 12px;
+            color: #4A5568;
+        }
+
+        .offday {
+            background: #EDF2F7;
+            padding: 16px;
+            border-radius: 16px;
+            text-align: center;
+            color: #718096;
+        }
+
+        .no-tasks {
+            background: #EDF2F7;
+            padding: 16px;
+            border-radius: 16px;
+            text-align: center;
+            color: #718096;
+        }
+
+        /* Tabs */
+        .mobile-tabs {
+            display: flex;
+            background: white;
+            border-top: 1px solid #E1E5E9;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            font-size: 12px;
+            color: #718096;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            color: #00D5FF;
+            border-top: 2px solid #00D5FF;
+        }
+
+        .drag-drop-area {
+            margin-top: 16px;
+            padding: 12px;
+            background: #F0F7FF;
+            border-radius: 12px;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .service-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+        
+        .engineer-radio {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- DESKTOP VIEW для руководителя -->
+<div class="desktop-container">
+    <div class="header">
+        <div class="logo">ТЕЛЕКОМ <span>| Управление выездным персоналом</span></div>
+        <div class="user-info">
+            <span>🌟Руководитель</span>
+            <div class="logout-btn">Выход</div>
+        </div>
+    </div>
+
+    <div class="filters">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label>📅 Дата:</label>
+                <div class="date-range">
+                    <input type="date" class="date-input" id="startDate" value="2025-04-04">
+                    <span>—</span>
+                    <input type="date" class="date-input" id="endDate" value="2025-04-24">
+                </div>
+            </div>
+            <div class="filter-group">
+                <label>🏷️ Статус:</label>
+                <div class="status-buttons">
+                    <span class="status-btn active">Все</span>
+                    <span class="status-btn">Новая</span>
+                    <span class="status-btn">Требует выезда</span>
+                    <span class="status-btn">Выполняется</span>
+                    <span class="status-btn">Закрыта</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="tickets-list">
+            <div class="list-header">📋 Список заявок (10 дней ±)</div>
+            <div id="ticketsList"></div>
+        </div>
+        <div class="info-panel" id="infoPanel">
+            <div class="info-title">Информация о заявке</div>
+            <div id="ticketDetails">
+                <p style="color: #999;">Выберите заявку для просмотра</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MOBILE VIEW для выездного инженера-->
+<div class="mobile-container" style="margin-top: 40px;">
+    <div class="mobile-status-bar">
+        <span>📱 16:06</span>
+        <span>🔋 99%</span>
+    </div>
+    <div class="mobile-header">
+        <span>☰</span>
+        <span>Выездной инженер</span>
+        <span>👤 Матроскин И.И.</span>
+    </div>
+    <div class="mobile-content" id="mobileContent">
+        <!-- динамически загружается -->
+    </div>
+    <div class="mobile-tabs">
+        <div class="tab active">📋 Задачи</div>
+        <div class="tab">📊 Профиль</div>
+        <div class="tab">⚙️ Настройки</div>
+    </div>
+</div>
+
+<script>
+    // Данные заявок от абонентов
+    const tickets = [
+        { id: 4521, date: "2025-04-14", time: "10:00", name: "🐱Кошкин А.А.", service: "Интернет", serviceCode: "internet", address: "ул. Ленина 15", phone: "+7 (999) 123-45-67", description: "Нет света на ONT, моргает LOS", status: "Требует выезда", district: "Василеостровский" },
+        { id: 4522, date: "2025-04-14", time: "11:30", name: "🎀Бантик М.И.", service: "Мобильная связь", serviceCode: "mobile", address: "ул. Садовая 10", phone: "+7 (999) 234-56-78", description: "Нет сигнала, SIM не определяется", status: "Новая", district: "Петроградский" },
+        { id: 4523, date: "2025-04-15", time: "09:00", name: "🎃Тыковка К.П.", service: "Телевидение", serviceCode: "tv", address: "ул. Пушкина 5", phone: "+7 (999) 345-67-89", description: "Нет изображения, чёрный экран", status: "Требует выезда", district: "Адмиралтейский" },
+        { id: 4524, date: "2025-04-15", time: "17:30", name: "🚀Маск И.Э.", service: "Видеонаблюдение", serviceCode: "cam", address: "ул. Гоголя 12", phone: "+7 (999) 456-78-90", description: "Камера не подключается", status: "Требует выезда", district: "Василеостровский" },
+        { id: 4525, date: "2025-04-15", time: "17:40", name: "👶Карапуз Д.А.", service: "Интернет", serviceCode: "internet", address: "ул. Невский 25", phone: "+7 (999) 567-89-01", description: "Низкая скорость", status: "Закрыта", district: "Петроградский" }
+    ];
+
+    const engineers = [
+        { name: "Матроскин И.И.", status: "available", district: "Василеостровский", inDistrict: true },
+        { name: "Печкин А.А.", status: "available", district: "Петроградский", inDistrict: false },
+        { name: "Федоров К.Д.", status: "available", district: "Адмиралтейский", inDistrict: false },
+        { name: "Пикачу П.П.", status: "vacation", district: null, inDistrict: false },
+        { name: "Наруто С.С.", status: "dayoff", district: null, inDistrict: false }
+    ];
+
+    let selectedTicket = null;
+
+    function getServiceClass(serviceCode) {
+        const classes = {
+            internet: "status-internet",
+            mobile: "status-mobile",
+            tv: "status-tv",
+            cam: "status-cam"
+        };
+        return classes[serviceCode] || "status-closed";
+    }
+
+    function getBorderClass(serviceCode) {
+        const classes = {
+            internet: "border-internet",
+            mobile: "border-mobile",
+            tv: "border-tv",
+            cam: "border-cam"
+        };
+        return classes[serviceCode] || "";
+    }
+
+    function getServiceColor(serviceCode) {
+        const colors = {
+            internet: "#00D5FF",
+            mobile: "#00FF80",
+            tv: "#FFF700",
+            cam: "#C400FF"
+        };
+        return colors[serviceCode] || "#CBD5E0";
+    }
+
+    function getDistrictColor(district) {
+        const colors = {
+            "Василеостровский": "#00D5FF",
+            "Петроградский": "#00FF80",
+            "Адмиралтейский": "#FFF700"
+        };
+        return colors[district] || "#CBD5E0";
+    }
+
+    function renderTickets() {
+        const container = document.getElementById('ticketsList');
+        container.innerHTML = tickets.map(ticket => `
+            <div class="ticket-item ${getBorderClass(ticket.serviceCode)} ${selectedTicket?.id === ticket.id ? 'selected' : ''}" onclick="selectTicket(${ticket.id})">
+                <div class="ticket-time">${ticket.date.slice(5)} | ${ticket.time}</div>
+                <div class="ticket-title">${ticket.name}</div>
+                <div class="ticket-service">${ticket.service} | ${ticket.district}</div>
+                <div class="ticket-status ${getServiceClass(ticket.serviceCode)}">${ticket.status}</div>
+            </div>
+        `).join('');
+    }
+
+    function selectTicket(id) {
+        selectedTicket = tickets.find(t => t.id === id);
+        renderTickets();
+        
+        const detailsDiv = document.getElementById('ticketDetails');
+        const canAssign = selectedTicket.status === "Требует выезда";
+        
+        detailsDiv.innerHTML = `
+            <div class="info-row"><div class="info-label">Номер заявки:</div><div class="info-value">#${selectedTicket.id}</div></div>
+            <div class="info-row"><div class="info-label">Дата создания:</div><div class="info-value">${selectedTicket.date} ${selectedTicket.time}</div></div>
+            <div class="info-row"><div class="info-label">Абонент:</div><div class="info-value">${selectedTicket.name}</div></div>
+            <div class="info-row"><div class="info-label">Услуга:</div><div class="info-value"><span class="service-badge" style="background:${getServiceColor(selectedTicket.serviceCode)}; color:${selectedTicket.serviceCode === 'cam' ? 'white' : '#1A2A3A'}">${selectedTicket.service}</span></div></div>
+            <div class="info-row"><div class="info-label">Адрес:</div><div class="info-value">${selectedTicket.address}</div></div>
+            <div class="info-row"><div class="info-label">Телефон:</div><div class="info-value">${selectedTicket.phone}</div></div>
+            <div class="info-row"><div class="info-label">Описание:</div><div class="info-value">${selectedTicket.description}</div></div>
+            <div class="info-row"><div class="info-label">Район:</div><div class="info-value">${selectedTicket.district}</div></div>
+            <div class="info-row"><div class="info-label">Статус:</div><div class="info-value"><span class="service-badge ${getServiceClass(selectedTicket.serviceCode)}">${selectedTicket.status}</span></div></div>
+            <button class="csv-btn" onclick="exportCSV()">📎 Выгрузить в CSV</button>
+            <button class="assign-btn ${!canAssign ? 'disabled' : ''}" ${!canAssign ? 'disabled' : 'onclick="openAssignModal()"'}>👷 Назначить инженера</button>
+        `;
+    }
+
+    function exportCSV() {
+    if (!selectedTicket) return;
+    
+    // Заголовки и данные
+    const headers = ["ID", "Дата", "Время", "Абонент", "Услуга", "Адрес", "Телефон", "Описание", "Статус", "Район"];
+    const row = [
+        selectedTicket.id,
+        selectedTicket.date,
+        selectedTicket.time,
+        selectedTicket.name,
+        selectedTicket.service,
+        selectedTicket.address,
+        selectedTicket.phone,
+        selectedTicket.description,
+        selectedTicket.status,
+        selectedTicket.district
+    ];
+    
+    // Экранирование полей, которые могут содержать запятые или кавычки
+    const escapeCSV = (field) => {
+        if (field === undefined || field === null) return '';
+        const stringField = String(field);
+        // Если поле содержит запятую, кавычку или перевод строки — оборачиваем в кавычки
+        if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
+            // Экранируем кавычки внутри поля (заменяем " на "")
+            return `"${stringField.replace(/"/g, '""')}"`;
+        }
+        return stringField;
+    };
+    
+    // Формируем CSV строки с экранированием
+    const csvRows = [
+        headers.map(escapeCSV).join(','),
+        row.map(escapeCSV).join(',')
+    ];
+    
+    const csvContent = csvRows.join('\n');
+    
+    // КЛЮЧЕВОЙ МОМЕНТ: Добавляем BOM (Byte Order Mark) для UTF-8
+    // BOM = \uFEFF — указывает программам (Excel), что файл в UTF-8
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    
+    // Скачивание
+    const a = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    a.href = url;
+    a.download = `ticket_${selectedTicket.id}_${selectedTicket.date}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    alert("✅ CSV успешно выгружен!");
+	}
+
+    function openAssignModal() {
+        const modalHtml = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span>👷 Назначение инженера</span>
+                    <span style="cursor:pointer" onclick="closeModal()">✕</span>
+                </div>
+                <div><strong>Заявка #${selectedTicket.id}</strong> | ${selectedTicket.service} | ${selectedTicket.date} ${selectedTicket.time}</div>
+                <div class="engineer-list" id="engineerList"></div>
+                <div class="schedule-preview" id="schedulePreview">Выберите инженера для просмотра расписания</div>
+                <div class="modal-buttons">
+                    <button class="confirm-btn" onclick="assignEngineer()">✅ Назначить</button>
+                    <button class="cancel-btn" onclick="closeModal()">Отмена</button>
+                </div>
+            </div>
+        `;
+        const modal = document.createElement('div');
+        modal.id = 'assignModal';
+        modal.className = 'modal';
+        modal.style.display = 'flex';
+        modal.innerHTML = modalHtml;
+        document.body.appendChild(modal);
+        renderEngineerList();
+    }
+
+    function renderEngineerList() {
+        const container = document.getElementById('engineerList');
+        container.innerHTML = engineers.map(eng => {
+            let colorClass = '';
+            let statusText = '';
+            let disabled = false;
+            if (eng.status === 'vacation' || eng.status === 'dayoff') {
+                colorClass = 'engineer-unavailable';
+                statusText = '❌ Недоступен (отпуск/выходной)';
+                disabled = true;
+            } else if (eng.inDistrict) {
+                colorClass = 'engineer-district';
+                statusText = '✅ В районе заявки';
+            } else {
+                colorClass = 'engineer-available';
+                statusText = '🟢 Доступен';
+            }
+            return `
+                <div class="engineer-item ${colorClass}" onclick="selectEngineer('${eng.name}')">
+                    <input type="radio" name="engineer" value="${eng.name}" class="engineer-radio" ${disabled ? 'disabled' : ''}>
+                    <div><strong>${eng.name}</strong><br><small>${statusText}</small></div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function selectEngineer(name) {
+        const engineer = engineers.find(e => e.name === name);
+        const preview = document.getElementById('schedulePreview');
+        if (engineer && (engineer.status === 'vacation' || engineer.status === 'dayoff')) {
+            preview.innerHTML = '❌ Инженер в отпуске/выходной — недоступен для назначения';
+            return;
+        }
+        preview.innerHTML = `
+            <strong>📅 Расписание ${name} на ${selectedTicket.date}:</strong><br><br>
+            🕘 09:00 │ #4518 │ Интернет │ ул. Садовая 10<br>
+            🕙 10:00 │ #${selectedTicket.id} │ ${selectedTicket.service} │ ${selectedTicket.address} <span style="color:green;font-weight:bold;">← НОВАЯ ЗАЯВКА</span><br>
+            🕦 11:30 │ ⏱️ СВОБОДНО<br>
+            🕐 13:00 │ #4525 │ ТВ │ ул. Пушкина 5<br><br>
+            <small>⏱️ Между заявками автоматически соблюдается перерыв 30 минут</small>
+        `;
+    }
+
+    function assignEngineer() {
+        alert(`✅ Инженер успешно назначен на заявку #${selectedTicket.id}!\n\nВремя выполнения зафиксировано в БД.\nРасписание обновлено.`);
+        closeModal();
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('assignModal');
+        if (modal) modal.remove();
+    }
+
+    // Mobile rendering
+    function renderMobile() {
+        const container = document.getElementById('mobileContent');
+        const today = new Date();
+        
+        const days = [];
+        for (let i = 0; i <= 10; i++) {
+            const date = new Date();
+            date.setDate(today.getDate() + i);
+            days.push(date);
+        }
+        
+        let html = '';
+        days.forEach((date, idx) => {
+            const dateStr = date.toISOString().slice(0,10);
+            const dayTickets = tickets.filter(t => t.date === dateStr);
+            let title = '';
+            if (idx === 0) title = '📅 СЕГОДНЯ, ' + date.toLocaleDateString('ru-RU', {day:'numeric', month:'long'}).toUpperCase();
+            else if (idx === 1) title = '📅 ЗАВТРА, ' + date.toLocaleDateString('ru-RU', {day:'numeric', month:'long'}).toUpperCase();
+            else title = '📅 ' + date.toLocaleDateString('ru-RU', {day:'numeric', month:'long'}).toUpperCase();
+            
+            html += `<div class="day-section"><div class="day-title">${title}</div>`;
+            
+            if (idx === 3) {
+                html += `<div class="offday">🚫 ВЫХОДНОЙ</div>`;
+            } else if (dayTickets.length === 0 && idx !== 3) {
+                html += `<div class="no-tasks">📭 Нет заявок</div>`;
+            } else {
+                dayTickets.forEach(ticket => {
+                    let colorClass = '';
+                    if (ticket.district === 'Василеостровский') colorClass = 'blue';
+                    else if (ticket.district === 'Петроградский') colorClass = 'green';
+                    else if (ticket.district === 'Адмиралтейский') colorClass = 'yellow';
+                    
+                    html += `
+                        <div class="task-card ${colorClass}" onclick="alert('📋 Заявка #${ticket.id}\\n👤 Абонент: ${ticket.name}\\n📍 Адрес: ${ticket.address}\\n📡 Услуга: ${ticket.service}\\n📝 Описание: ${ticket.description}\\n📞 Телефон: ${ticket.phone}')">
+                            <div class="task-time">⏰ ${ticket.time}</div>
+                            <div class="task-address">📍 ${ticket.address}</div>
+                            <div class="task-service">📡 ${ticket.service} | ${ticket.district}</div>
+                        </div>
+                    `;
+                });
+            }
+            html += `</div>`;
+        });
+        
+        container.innerHTML = html;
+    }
+
+    // Initial render
+    renderTickets();
+    renderMobile();
+</script>
+
+</body>
+</html>
